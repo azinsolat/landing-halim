@@ -3,9 +3,9 @@
   // All x/y values are fractions of the full bowl image, measured from its top-left.
   const CONFIG = {
     duration: 5.8,
-    emitter: { x: 0.493, y: 0.448, spread: 0.022 },
+    emitter: { x: 0.493, y: 0.448, spread: 0.042 },
     steamSources: [{ x: 0.37, y: 0.36 }, { x: 0.46, y: 0.32 }, { x: 0.56, y: 0.34 }, { x: 0.64, y: 0.37 }],
-    cinnamon: { particlesPerSecond: 820, maxParticles: 640, speed: 0.94, size: [0.3, 0.8], pourStart: 0.35, pourEnd: 3.8, shutter: 0.009 },
+    cinnamon: { particlesPerSecond: 1900, maxParticles: 1400, speed: 0.94, size: [0.35, 0.9], pourStart: 0.35, pourEnd: 3.8, shutter: 0.009, spiralRadius: 0.023, spiralTurns: 1.65, spiralSpeed: 2.4 },
     deposit: { width: 0.063, height: 0.06, grains: 8600, fadeStart: 4.65 }
   };
   const hero = document.querySelector('.hero');
@@ -123,6 +123,16 @@
     context.drawImage(texture, CONFIG.emitter.x * width - w / 2, top + CONFIG.emitter.y * height - h / 2, w, h);
     context.restore();
   }
+  function fallingX(particle, y) {
+    const flight = Math.min(1, Math.max(0, y / particle.target));
+    // A shared rotating helix keeps the powder in a visible winding stream.
+    // Taper its radius to zero at impact so it still lands in the same gap.
+    const angle = flight * Math.PI * 2 * CONFIG.cinnamon.spiralTurns
+      - elapsed * CONFIG.cinnamon.spiralSpeed + particle.swirl;
+    const radius = width * CONFIG.cinnamon.spiralRadius * (1 - smooth(0.65, 1, flight));
+    return particle.originX + (particle.landingX - particle.originX) * flight
+      + Math.sin(angle) * radius;
+  }
   function tick(timestamp) {
     frame = 0;
     const dt = previous ? Math.min((timestamp - previous) / 1000, 0.05) : 0;
@@ -149,7 +159,7 @@
         target: targetY + depth * CONFIG.deposit.height * height * 0.82,
         velocity: (height + top) * CONFIG.cinnamon.speed * (0.72 + Math.random() * 0.18),
         gravity: (height + top) * 0.5,
-        phase: Math.random() * Math.PI * 2,
+        phase: Math.random() * Math.PI * 2, swirl: (Math.random() - 0.5) * 0.65,
         size: CONFIG.cinnamon.size[0] + Math.random() * (CONFIG.cinnamon.size[1] - CONFIG.cinnamon.size[0]),
         shade: Math.floor(140 + Math.random() * 46), alpha: 0.2 + Math.random() * 0.34 });
     }
@@ -159,17 +169,15 @@
       const particle = particles[i];
       particle.velocity += particle.gravity * dt;
       particle.y += particle.velocity * dt;
-      const flight = Math.min(1, Math.max(0, particle.y / particle.target));
-      particle.x = particle.originX + (particle.landingX - particle.originX) * flight;
       if (particle.y >= particle.target) { particles.splice(i, 1); hits++; continue; }
-      const x = particle.x + Math.sin(elapsed * 4 + particle.phase) * width * 0.0006 * flight;
+      const x = fallingX(particle, particle.y);
       const color = `${particle.shade},${Math.floor(particle.shade * 0.55)},${Math.floor(particle.shade * 0.22)}`;
       // Short, translucent exposure streaks, followed by a sharp powder grain.
       // The trail ends at the grain; nothing is drawn below its impact point.
       const trail = Math.min(6, particle.velocity * CONFIG.cinnamon.shutter);
       context.strokeStyle = `rgba(${color},${particle.alpha * 0.32})`;
       context.lineWidth = Math.max(0.3, particle.size * 0.72);
-      context.beginPath(); context.moveTo(x, particle.y - trail); context.lineTo(x, particle.y); context.stroke();
+      context.beginPath(); context.moveTo(fallingX(particle, particle.y - trail), particle.y - trail); context.lineTo(x, particle.y); context.stroke();
       context.fillStyle = `rgba(${color},${particle.alpha})`;
       context.beginPath();
       context.ellipse(x, particle.y, particle.size, particle.size * 0.72, particle.phase, 0, Math.PI * 2);
