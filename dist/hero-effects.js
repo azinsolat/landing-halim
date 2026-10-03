@@ -3,7 +3,7 @@
   // All x/y values are fractions of the full bowl image, measured from its top-left.
   const CONFIG = {
     duration: 5.8,
-    emitter: { x: 0.483, y: 0.465, spread: 0.022 },
+    emitter: { x: 0.493, y: 0.448, spread: 0.022 },
     steamSources: [{ x: 0.37, y: 0.36 }, { x: 0.46, y: 0.32 }, { x: 0.56, y: 0.34 }, { x: 0.64, y: 0.37 }],
     cinnamon: { particlesPerSecond: 820, maxParticles: 640, speed: 0.94, size: [0.3, 0.8], pourStart: 0.35, pourEnd: 3.8, shutter: 0.009 },
     deposit: { width: 0.063, height: 0.06, grains: 8600, fadeStart: 4.65 }
@@ -27,15 +27,18 @@
   const particles = [];
   let width = 0, height = 0, top = 0, dpr = 1;
   let frame = 0, previous = 0, elapsed = 0, carry = 0, hits = 0;
+  let depositedGrains = 0;
   let visible = false, disposed = false, suspended = false;
   let seed = 53;
   const random = () => { seed = seed * 16807 % 2147483647; return (seed - 1) / 2147483646; };
   const grains = Array.from({ length: CONFIG.deposit.grains }, () => {
     const angle = random() * Math.PI * 2;
-    const radius = Math.pow(random(), 0.68) * (0.86 + random() * 0.14);
+    const edge = 0.9 + 0.045 * Math.sin(angle * 3 + 0.5) + 0.035 * Math.sin(angle * 7);
+    const radius = Math.pow(random(), 0.68) * edge;
     return { x: Math.cos(angle) * radius, y: Math.sin(angle) * radius,
+      arrival: random() * 0.6 + radius * radius * 0.4,
       size: 0.22 + random() * 0.55, alpha: 0.24 + random() * 0.44, shade: Math.floor(112 + random() * 76) };
-  });
+  }).sort((a, b) => a.arrival - b.arrival);
   const smooth = (a, b, value) => {
     const t = Math.max(0, Math.min(1, (value - a) / (b - a)));
     return t * t * (3 - 2 * t);
@@ -45,26 +48,25 @@
     texture.width = Math.max(1, Math.ceil((w + 4) * dpr));
     texture.height = Math.max(1, Math.ceil((h + 4) * dpr));
     textureContext.setTransform(dpr, 0, 0, dpr, 0, 0);
-    // A soft powder bed, with a warm lit center and granular, irregular edges.
-    // This texture is cached only on resize; the falling grains stay on their own layer.
-    textureContext.save();
-    textureContext.translate(w / 2 + 2, h / 2 + 2);
-    textureContext.scale(w / 2, h / 2);
-    const bed = textureContext.createRadialGradient(-0.12, -0.18, 0.02, 0, 0, 1);
-    bed.addColorStop(0, 'rgba(166,91,39,0.78)');
-    bed.addColorStop(0.5, 'rgba(148,73,29,0.62)');
-    bed.addColorStop(0.8, 'rgba(135,65,27,0.25)');
-    bed.addColorStop(1, 'rgba(135,65,27,0)');
-    textureContext.fillStyle = bed;
-    textureContext.beginPath(); textureContext.arc(0, 0, 1, 0, Math.PI * 2); textureContext.fill();
-    textureContext.restore();
-    grains.forEach(grain => {
+    depositedGrains = 0;
+  }
+  function resetDeposit() {
+    depositedGrains = 0;
+    textureContext.clearRect(0, 0, texture.width / dpr, texture.height / dpr);
+  }
+  function accumulateDeposit() {
+    // Add individual specks only after impacts. Already deposited specks stay fixed;
+    // the denser center builds first, with scattered grains and a ragged outer edge.
+    const count = Math.min(grains.length, Math.floor(hits / (CONFIG.cinnamon.particlesPerSecond * 2.65) * grains.length));
+    const w = CONFIG.deposit.width * width * 2, h = CONFIG.deposit.height * height * 2;
+    while (depositedGrains < count) {
+      const grain = grains[depositedGrains++];
       textureContext.fillStyle = `rgba(${grain.shade},${Math.floor(grain.shade * 0.55)},${Math.floor(grain.shade * 0.23)},${grain.alpha})`;
       textureContext.beginPath();
       textureContext.ellipse(w / 2 + 2 + grain.x * w / 2, h / 2 + 2 + grain.y * h / 2,
         grain.size * Math.max(0.7, width / 950), grain.size * Math.max(0.45, width / 1400), 0, 0, Math.PI * 2);
       textureContext.fill();
-    });
+    }
   }
   function measure() {
     const box = bowl.getBoundingClientRect(), heroBox = hero.getBoundingClientRect();
@@ -112,13 +114,12 @@
     context.restore();
   }
   function drawDeposit(cycle) {
-    const amount = smooth(0, CONFIG.cinnamon.particlesPerSecond * 2.65, hits);
     const fade = 1 - smooth(CONFIG.deposit.fadeStart, CONFIG.duration, cycle);
-    if (amount <= 0 || fade <= 0) return;
+    if (hits <= 0 || fade <= 0) return;
+    accumulateDeposit();
     const context = contexts[1];
-    const scale = 0.92 + amount * 0.08;
-    const w = texture.width / dpr * scale, h = texture.height / dpr * scale;
-    context.save(); context.globalAlpha = Math.pow(amount, 0.72) * fade;
+    const w = texture.width / dpr, h = texture.height / dpr;
+    context.save(); context.globalAlpha = fade;
     context.drawImage(texture, CONFIG.emitter.x * width - w / 2, top + CONFIG.emitter.y * height - h / 2, w, h);
     context.restore();
   }
@@ -128,7 +129,7 @@
     previous = timestamp;
     const lastCycle = Math.floor(elapsed / CONFIG.duration);
     elapsed += dt;
-    if (Math.floor(elapsed / CONFIG.duration) !== lastCycle) { hits = 0; carry = 0; particles.length = 0; }
+    if (Math.floor(elapsed / CONFIG.duration) !== lastCycle) { hits = 0; carry = 0; particles.length = 0; resetDeposit(); }
     const cycle = elapsed % CONFIG.duration;
     // Slight changes in flow make the stream behave like poured fine powder.
     const flow = 0.91 + 0.06 * Math.sin(cycle * 13) + 0.03 * Math.sin(cycle * 31);
@@ -183,7 +184,7 @@
     if (!disposed && !suspended && visible && !document.hidden && !motion.matches && bowl.complete && bowl.naturalWidth > 0 && width > 0) {
       frame = requestAnimationFrame(tick);
     }
-    if (motion.matches) { particles.length = 0; elapsed = 0; hits = 0; carry = 0; clear(); }
+    if (motion.matches) { particles.length = 0; elapsed = 0; hits = 0; carry = 0; resetDeposit(); clear(); }
   }
   const resize = new ResizeObserver(() => { measure(); update(); });
   resize.observe(hero); resize.observe(bowl);
