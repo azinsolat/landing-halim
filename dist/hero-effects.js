@@ -3,10 +3,10 @@
   // All x/y values are fractions of the full bowl image, measured from its top-left.
   const CONFIG = {
     duration: 5.8,
-    emitter: { x: 0.503, y: 0.43, spread: 0.016 },
+    emitter: { x: 0.503, y: 0.43, spread: 0.022 },
     steamSources: [{ x: 0.37, y: 0.36 }, { x: 0.46, y: 0.32 }, { x: 0.56, y: 0.34 }, { x: 0.64, y: 0.37 }],
-    cinnamon: { particlesPerSecond: 185, maxParticles: 240, speed: 1.2, size: [0.35, 0.95], pourEnd: 3.45 },
-    deposit: { width: 0.032, height: 0.03, grains: 900, fadeStart: 4.65 }
+    cinnamon: { particlesPerSecond: 820, maxParticles: 640, speed: 0.94, size: [0.3, 0.8], pourStart: 0.35, pourEnd: 3.8, shutter: 0.009 },
+    deposit: { width: 0.046, height: 0.043, grains: 4600, fadeStart: 4.65 }
   };
   const hero = document.querySelector('.hero');
   const bowl = hero?.querySelector('.hero-bowl-image');
@@ -32,9 +32,9 @@
   const random = () => { seed = seed * 16807 % 2147483647; return (seed - 1) / 2147483646; };
   const grains = Array.from({ length: CONFIG.deposit.grains }, () => {
     const angle = random() * Math.PI * 2;
-    const radius = Math.sqrt(random()) * (0.78 + random() * 0.22);
+    const radius = Math.pow(random(), 0.68) * (0.86 + random() * 0.14);
     return { x: Math.cos(angle) * radius, y: Math.sin(angle) * radius,
-      size: 0.25 + random() * 0.65, alpha: 0.18 + random() * 0.43, shade: Math.floor(85 + random() * 45) };
+      size: 0.22 + random() * 0.55, alpha: 0.24 + random() * 0.44, shade: Math.floor(112 + random() * 76) };
   });
   const smooth = (a, b, value) => {
     const t = Math.max(0, Math.min(1, (value - a) / (b - a)));
@@ -45,8 +45,21 @@
     texture.width = Math.max(1, Math.ceil((w + 4) * dpr));
     texture.height = Math.max(1, Math.ceil((h + 4) * dpr));
     textureContext.setTransform(dpr, 0, 0, dpr, 0, 0);
+    // A soft powder bed, with a warm lit center and granular, irregular edges.
+    // This texture is cached only on resize; the falling grains stay on their own layer.
+    textureContext.save();
+    textureContext.translate(w / 2 + 2, h / 2 + 2);
+    textureContext.scale(w / 2, h / 2);
+    const bed = textureContext.createRadialGradient(-0.12, -0.18, 0.02, 0, 0, 1);
+    bed.addColorStop(0, 'rgba(166,91,39,0.78)');
+    bed.addColorStop(0.5, 'rgba(148,73,29,0.62)');
+    bed.addColorStop(0.8, 'rgba(135,65,27,0.25)');
+    bed.addColorStop(1, 'rgba(135,65,27,0)');
+    textureContext.fillStyle = bed;
+    textureContext.beginPath(); textureContext.arc(0, 0, 1, 0, Math.PI * 2); textureContext.fill();
+    textureContext.restore();
     grains.forEach(grain => {
-      textureContext.fillStyle = `rgba(${grain.shade},${Math.floor(grain.shade * 0.55)},${Math.floor(grain.shade * 0.28)},${grain.alpha})`;
+      textureContext.fillStyle = `rgba(${grain.shade},${Math.floor(grain.shade * 0.55)},${Math.floor(grain.shade * 0.23)},${grain.alpha})`;
       textureContext.beginPath();
       textureContext.ellipse(w / 2 + 2 + grain.x * w / 2, h / 2 + 2 + grain.y * h / 2,
         grain.size * Math.max(0.7, width / 950), grain.size * Math.max(0.45, width / 1400), 0, 0, Math.PI * 2);
@@ -99,13 +112,13 @@
     context.restore();
   }
   function drawDeposit(cycle) {
-    const amount = smooth(0, CONFIG.cinnamon.particlesPerSecond * 2.6, hits);
+    const amount = smooth(0, CONFIG.cinnamon.particlesPerSecond * 2.65, hits);
     const fade = 1 - smooth(CONFIG.deposit.fadeStart, CONFIG.duration, cycle);
     if (amount <= 0 || fade <= 0) return;
     const context = contexts[1];
-    const scale = 0.93 + amount * 0.07;
+    const scale = 0.92 + amount * 0.08;
     const w = texture.width / dpr * scale, h = texture.height / dpr * scale;
-    context.save(); context.globalAlpha = amount * fade * 0.85;
+    context.save(); context.globalAlpha = Math.pow(amount, 0.72) * fade;
     context.drawImage(texture, CONFIG.emitter.x * width - w / 2, top + CONFIG.emitter.y * height - h / 2, w, h);
     context.restore();
   }
@@ -117,22 +130,27 @@
     elapsed += dt;
     if (Math.floor(elapsed / CONFIG.duration) !== lastCycle) { hits = 0; carry = 0; particles.length = 0; }
     const cycle = elapsed % CONFIG.duration;
-    const rate = CONFIG.cinnamon.particlesPerSecond * smooth(0.1, 0.55, cycle)
-      * (1 - smooth(CONFIG.cinnamon.pourEnd - 0.6, CONFIG.cinnamon.pourEnd, cycle));
+    // Slight changes in flow make the stream behave like poured fine powder.
+    const flow = 0.91 + 0.06 * Math.sin(cycle * 13) + 0.03 * Math.sin(cycle * 31);
+    const rate = CONFIG.cinnamon.particlesPerSecond * flow
+      * smooth(CONFIG.cinnamon.pourStart, CONFIG.cinnamon.pourStart + 0.5, cycle)
+      * (1 - smooth(CONFIG.cinnamon.pourEnd - 0.5, CONFIG.cinnamon.pourEnd, cycle));
     carry += rate * dt;
     const targetY = top + CONFIG.emitter.y * height;
     while (carry >= 1) {
       carry--;
       if (particles.length >= CONFIG.cinnamon.maxParticles) continue;
-      const offset = (Math.random() + Math.random() - 1) * CONFIG.emitter.spread * width;
-      particles.push({ x: CONFIG.emitter.x * width + offset, y: -3,
-        target: targetY + (Math.random() - 0.5) * CONFIG.deposit.height * height,
-        velocity: (height + top) * CONFIG.cinnamon.speed * (0.62 + Math.random() * 0.24),
-        gravity: (height + top) * 0.65,
-        drift: (Math.random() - 0.5) * width * 0.012,
+      const offset = (Math.random() + Math.random() + Math.random() - 1.5) / 1.5;
+      const depth = (Math.random() + Math.random() - 1);
+      const originX = CONFIG.emitter.x * width + offset * CONFIG.emitter.spread * width * 0.62;
+      const landingX = CONFIG.emitter.x * width + offset * CONFIG.deposit.width * width * 0.88;
+      particles.push({ x: originX, originX, landingX, y: -3,
+        target: targetY + depth * CONFIG.deposit.height * height * 0.82,
+        velocity: (height + top) * CONFIG.cinnamon.speed * (0.72 + Math.random() * 0.18),
+        gravity: (height + top) * 0.5,
         phase: Math.random() * Math.PI * 2,
         size: CONFIG.cinnamon.size[0] + Math.random() * (CONFIG.cinnamon.size[1] - CONFIG.cinnamon.size[0]),
-        shade: Math.floor(95 + Math.random() * 48), alpha: 0.38 + Math.random() * 0.4 });
+        shade: Math.floor(140 + Math.random() * 46), alpha: 0.2 + Math.random() * 0.34 });
     }
     clear(); drawSteam(cycle);
     const context = contexts[2];
@@ -140,10 +158,18 @@
       const particle = particles[i];
       particle.velocity += particle.gravity * dt;
       particle.y += particle.velocity * dt;
-      particle.x += particle.drift * dt;
+      const flight = Math.min(1, Math.max(0, particle.y / particle.target));
+      particle.x = particle.originX + (particle.landingX - particle.originX) * flight;
       if (particle.y >= particle.target) { particles.splice(i, 1); hits++; continue; }
-      const x = particle.x + Math.sin(elapsed * 3 + particle.phase) * width * 0.001;
-      context.fillStyle = `rgba(${particle.shade},${Math.floor(particle.shade * 0.56)},${Math.floor(particle.shade * 0.3)},${particle.alpha})`;
+      const x = particle.x + Math.sin(elapsed * 4 + particle.phase) * width * 0.0006 * flight;
+      const color = `${particle.shade},${Math.floor(particle.shade * 0.55)},${Math.floor(particle.shade * 0.22)}`;
+      // Short, translucent exposure streaks, followed by a sharp powder grain.
+      // The trail ends at the grain; nothing is drawn below its impact point.
+      const trail = Math.min(6, particle.velocity * CONFIG.cinnamon.shutter);
+      context.strokeStyle = `rgba(${color},${particle.alpha * 0.32})`;
+      context.lineWidth = Math.max(0.3, particle.size * 0.72);
+      context.beginPath(); context.moveTo(x, particle.y - trail); context.lineTo(x, particle.y); context.stroke();
+      context.fillStyle = `rgba(${color},${particle.alpha})`;
       context.beginPath();
       context.ellipse(x, particle.y, particle.size, particle.size * 0.72, particle.phase, 0, Math.PI * 2);
       context.fill();
