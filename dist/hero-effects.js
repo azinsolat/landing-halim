@@ -3,10 +3,10 @@
   // All x/y values are fractions of the full bowl image, measured from its top-left.
   const CONFIG = {
     duration: 5.8,
-    emitter: { x: 0.503, y: 0.43, spread: 0.022 },
+    emitter: { x: 0.483, y: 0.465, spread: 0.022 },
     steamSources: [{ x: 0.37, y: 0.36 }, { x: 0.46, y: 0.32 }, { x: 0.56, y: 0.34 }, { x: 0.64, y: 0.37 }],
     cinnamon: { particlesPerSecond: 820, maxParticles: 640, speed: 0.94, size: [0.3, 0.8], pourStart: 0.35, pourEnd: 3.8, shutter: 0.009 },
-    deposit: { width: 0.046, height: 0.043, grains: 4600, fadeStart: 4.65 }
+    deposit: { width: 0.063, height: 0.06, grains: 8600, fadeStart: 4.65 }
   };
   const hero = document.querySelector('.hero');
   const bowl = hero?.querySelector('.hero-bowl-image');
