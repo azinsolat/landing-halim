@@ -93,13 +93,13 @@
         const phase = (time / CONFIG.duration + i * 0.19 + ribbon * 0.5) % 1;
         const envelope = Math.sin(Math.PI * phase) ** 2;
         const baseX = source.x * width, baseY = top + source.y * height;
-        const rise = height * (0.07 + phase * 0.28);
+        const rise = height * (0.11 + phase * 0.45);
         const gradient = context.createLinearGradient(0, baseY, 0, baseY - rise);
         gradient.addColorStop(0, 'rgba(255,252,244,0)');
-        gradient.addColorStop(0.18, `rgba(255,252,244,${0.28 * envelope})`);
-        gradient.addColorStop(0.64, `rgba(238,230,211,${0.18 * envelope})`);
+        gradient.addColorStop(0.18, `rgba(255,252,244,${0.48 * envelope})`);
+        gradient.addColorStop(0.64, `rgba(178,173,162,${0.32 * envelope})`);
         gradient.addColorStop(1, 'rgba(255,252,244,0)');
-        context.strokeStyle = gradient; context.lineWidth = Math.max(1.6, width * 0.0035);
+        context.strokeStyle = gradient; context.lineWidth = Math.max(2, width * 0.0045);
         context.beginPath();
         for (let step = 0; step <= 28; step++) {
           const u = step / 28;
