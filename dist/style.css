@@ -35,3 +35,30 @@
 @media(max-width:700px){.hero-bowl-stage{left:2.9%}}
 @media(max-width:700px){.hero-visual{top:225px}}
 @media(max-width:380px){.hero-visual{top:215px}}
+
+/* Palette-led page atmosphere: warm cream with quiet saffron, green, and Persian-red light. */
+body{
+ background-color:var(--cream);
+ background-image:
+  radial-gradient(ellipse 48rem 34rem at 3% 24%,rgba(209,172,63,.13),transparent 72%),
+  radial-gradient(ellipse 42rem 42rem at 98% 57%,rgba(47,93,80,.09),transparent 72%),
+  radial-gradient(ellipse 46rem 36rem at 30% 92%,rgba(137,35,32,.045),transparent 76%),
+  linear-gradient(135deg,rgba(255,255,255,.15),transparent 48%,rgba(209,172,63,.035));
+ background-attachment:fixed;
+}
+header{background:linear-gradient(112deg,#f2e6d8 0%,#f7eee3 52%,#f2e6d8 100%)}
+.hero{
+ background:
+  radial-gradient(ellipse 42% 54% at 8% 82%,rgba(209,172,63,.12),transparent 100%),
+  radial-gradient(ellipse 38% 52% at 92% 16%,rgba(47,93,80,.08),transparent 100%),
+  radial-gradient(ellipse at 50% 42%,#fffaf3 0%,var(--cream) 70%);
+}
+.menu-section{
+ background-color:var(--cream);
+ background-image:
+  radial-gradient(ellipse 42rem 24rem at 0% 0%,rgba(209,172,63,.11),transparent 72%),
+  radial-gradient(ellipse 38rem 24rem at 100% 100%,rgba(47,93,80,.075),transparent 72%),
+  linear-gradient(118deg,#f2e6d8 0%,#fcf8f2 48%,#f2e6d8 100%);
+ border-block:1px solid rgba(209,172,63,.22);
+}
+@media(max-width:700px){body{background-attachment:scroll}}
