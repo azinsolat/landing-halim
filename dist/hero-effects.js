@@ -6,6 +6,34 @@
   const foreground = hero?.querySelector('.hero-video-main');
   if (!foreground) return;
   const menu = document.querySelector('.menu-section');
+  const scrollVideo = hero.querySelector('.hero-video-scroll');
+  let wantsScrollVideo = false;
+  let scrollVideoReady = scrollVideo.readyState >= 2;
+  let scrollVideoFailed = false;
+  let firstVideoFailed = false;
+  let activeVideo = foreground;
+
+  function updateVideo() {
+    const useSecond = scrollVideoReady && !scrollVideoFailed && (wantsScrollVideo || firstVideoFailed);
+    const next = useSecond ? scrollVideo : foreground;
+    hero.classList.toggle('hero-scroll-video-active', useSecond);
+    if (next !== activeVideo) {
+      activeVideo = next;
+      syncPlayback();
+    }
+  }
+  scrollVideo.addEventListener('loadeddata', () => {
+    scrollVideoReady = true;
+    updateVideo();
+  });
+  scrollVideo.addEventListener('error', () => {
+    scrollVideoFailed = true;
+    updateVideo();
+  });
+  foreground.addEventListener('error', () => {
+    firstVideoFailed = true;
+    updateVideo();
+  });
 
   const reducedMotion = matchMedia('(prefers-reduced-motion: reduce)');
   const compact = matchMedia('(max-width: 700px)');
@@ -19,15 +47,23 @@
   function syncPlayback() {
     if (document.hidden || reducedMotion.matches || !sceneVisible) {
       foreground.pause();
+      scrollVideo.pause();
       return;
     }
-    const request = foreground.play();
+    const request = activeVideo.play();
     if (request?.catch) request.catch(() => {});
+    // The underlying clip keeps playing during the fade to avoid a frozen transition.
+    if (activeVideo === scrollVideo && !firstVideoFailed) foreground.play()?.catch(() => {});
+    if (activeVideo === foreground) scrollVideo.pause();
   }
 
   function render() {
     frame = 0;
     const progress = reducedMotion.matches ? 0 : clamp((scrollY - sceneTop) / distance);
+    // Hysteresis prevents flickering when scrolling around the transition point.
+    if (progress > 0.18) wantsScrollVideo = true;
+    else if (progress < 0.08) wantsScrollVideo = false;
+    updateVideo();
     const move = ease((progress - 0.08) / 0.76);
     const fade = ease(progress / 0.38);
     const enter = ease((progress - 0.28) / 0.5);

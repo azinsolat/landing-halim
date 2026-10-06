@@ -20,6 +20,8 @@ img{display:block;max-width:100%}
 .mobile-toggle{display:none;background:none;border:0;color:var(--green);font-size:25px}
 .hero-visual{position:absolute;z-index:0;inset:0;overflow:hidden;isolation:isolate;pointer-events:none}
 .hero-video{position:absolute;display:block;object-position:50% 50%;opacity:1;pointer-events:none;background:transparent}
+.hero-video-scroll{z-index:2!important;opacity:0;transition:opacity .65s cubic-bezier(.22,1,.36,1)}
+.hero-scroll-video-active .hero-video-scroll{opacity:1}
 .hero-video-main{z-index:1;left:50%;top:50%;width:min(58vw,930px);height:min(79svh,745px);object-fit:contain;transform:translate(-50%,-50%)}
 .hero-content{position:absolute;z-index:3;top:43%;right:7.5%;left:auto;translate:0 -50%;width:min(23%,320px);text-align:right;animation:hero-text-reveal .9s .2s cubic-bezier(.2,.72,.22,1) both}
 .hero-kicker{display:flex;align-items:center;gap:10px;margin-bottom:19px;color:var(--green);font-size:11px;letter-spacing:.2px}
@@ -119,10 +121,11 @@ img{display:block;max-width:100%}
 }
 
 /* The actual menu travels into the composition, directly beneath its title. */
-.menu-section.hero-menu-intro{right:7%;top:54%;width:44%;padding:0;background:transparent;pointer-events:auto;max-height:calc(100svh - 155px);overflow-y:auto;overflow-x:hidden;scrollbar-width:thin}
+.menu-section.hero-menu-intro{right:7%;top:54%;width:44%;padding:12px 6px;background:transparent;pointer-events:auto;overflow:visible}
+.hero-menu-intro .menu-scroll-content{max-height:calc(100svh - 300px);overflow-y:auto;overflow-x:hidden;padding:0 0 8px 24px;scrollbar-width:thin;scrollbar-gutter:stable;scrollbar-color:rgba(137,35,32,.28) transparent}
 .hero-menu-intro .menu-topline,.hero-menu-intro .menu-feature,.hero-menu-intro .menu-heading>p,.hero-menu-intro .menu-note{display:none}
 .hero-menu-intro .menu-heading{padding:0 0 14px;display:block}
-.hero-menu-intro .menu-heading h2{font-size:clamp(36px,4vw,58px);margin:6px 0 0;letter-spacing:-2px;line-height:1.3}
+.hero-menu-intro .menu-heading h2{font-size:clamp(36px,4vw,58px);margin:6px 0 0;padding-top:6px;letter-spacing:-2px;line-height:1.5}
 .hero-menu-intro .menu-heading h2 em{color:var(--green)}
 .hero-menu-intro .menu-tabs{margin:0 0 12px;gap:26px}
 .hero-menu-intro .menu-tabs button{padding:10px 0 12px}
@@ -132,7 +135,8 @@ img{display:block;max-width:100%}
 .hero-menu-intro .item-title h3{font-size:clamp(16px,1.5vw,21px)}
 .hero-menu-intro .menu-item p{font-size:12px}
 @media(max-width:700px){
-  .menu-section.hero-menu-intro{right:6%;top:38%;width:88%;translate:none;max-height:calc(62svh - 24px)}
+  .menu-section.hero-menu-intro{right:6%;top:38%;width:88%;padding:8px 4px;translate:none}
+  .hero-menu-intro .menu-scroll-content{max-height:calc(62svh - 135px);padding-left:20px}
   .hero-menu-intro .menu-heading{padding-bottom:10px}
   .hero-menu-intro .menu-heading h2{font-size:32px;letter-spacing:-1px}
   .hero-menu-intro .menu-kicker{font-size:10px}
