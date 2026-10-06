@@ -6,7 +6,7 @@
 <title>حلیم‌سرا | حلیم تبریز</title>
 <meta name="description" content="حلیم‌سرا؛ حلیم اصیل تبریز، پخته‌شده با حوصله و سرو تازه.">
 <link rel="icon" href="assets/logo.png">
-<link rel="stylesheet" href="style.css">
+  <link rel="stylesheet" href="style.css?v=20261006-no-blur">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Vazirmatn:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
@@ -27,19 +27,23 @@
     <button class="mobile-toggle" aria-label="باز کردن منو" aria-expanded="false">☰</button>
   </header>
   <div class="hero-content">
-    <span class="hero-kicker"><i aria-hidden="true"></i> تبریز · پختِ آرام</span>
-    <h1 id="hero-title">حلیم<br><em>به رسمِ تبریز</em></h1>
+    <span class="hero-kicker"><i aria-hidden="true"></i> صبحانهٔ تبریزی</span>
+    <div class="hero-title-mask">
+      <h1 id="hero-title">حلیم<br><em>گرم و خوش‌عطر</em></h1>
+    </div>
   </div>
   <div class="hero-visual" aria-hidden="true">
-    <div class="hero-bowl-stage"><img class="hero-bowl-image" src="assets/hero-bowl-cutout.png" width="1698" height="926" fetchpriority="high" alt=""></div>
+    <video class="hero-video hero-video-main" autoplay muted loop playsinline preload="auto" tabindex="-1">
+      <source src="assets/hero-intro-20261007.mp4" type="video/mp4">
+    </video>
   </div>
   <div class="hero-copy">
-    <span class="hero-copy-label">پختِ طولانی · طعمِ اصیل</span>
-    <p>گرم و تازه.<br>همین‌قدر ساده.</p>
-    <a class="button" href="#menu">دیدن منو <span aria-hidden="true">↙</span></a>
+    <span class="hero-copy-label">کره · دارچین · کنجد</span>
+    <p>مخلفات را به سلیقهٔ خودتان<br>انتخاب کنید.</p>
+    <a class="button" href="#menu">منوی صبحانه <span aria-hidden="true">↙</span></a>
   </div>
   <span class="hero-side" dir="ltr">SLOW COOKED · TABRIZ</span>
-  <a class="hero-bottom" href="#menu"><span>برای منو پایین بروید</span><span aria-hidden="true">↓</span></a>
+  <a class="hero-bottom" href="#menu"><span>برای دیدن منو پایین بروید</span><span aria-hidden="true">↓</span></a>
 </section>
 <section class="menu-section" id="menu" aria-labelledby="menu-title">
   <div class="menu-topline"><span>حلیم‌سرا / منوی صبحانه</span><span dir="ltr">01 — 03</span></div>
@@ -68,6 +72,6 @@
   <a href="#home">بازگشت به بالا ↑</a>
 </footer>
 <script src="app.js"></script>
-<script src="hero-effects.js"></script>
+<script src="hero-effects.js" defer></script>
 </body>
 </html>
