@@ -12,11 +12,16 @@
   let scrollVideoFailed = false;
   let firstVideoFailed = false;
   let activeVideo = foreground;
+  let scrollMix = 0;
+  let targetMix = 0;
+  let lastFrameTime = 0;
+  let secondPlaying = false;
+  scrollVideo.addEventListener('playing', () => { secondPlaying = true; requestRender(); });
 
   function updateVideo() {
     const useSecond = scrollVideoReady && !scrollVideoFailed && (wantsScrollVideo || firstVideoFailed);
     const next = useSecond ? scrollVideo : foreground;
-    hero.classList.toggle('hero-scroll-video-active', useSecond);
+    targetMix = useSecond && secondPlaying ? (firstVideoFailed ? 1 : desiredMix) : 0;
     if (next !== activeVideo) {
       activeVideo = next;
       syncPlayback();
@@ -43,6 +48,7 @@
   let sceneVisible = true;
   const clamp = value => Math.min(1, Math.max(0, value));
   const ease = value => { const p = clamp(value); return p * p * (3 - 2 * p); };
+  let desiredMix = 0;
 
   function syncPlayback() {
     if (document.hidden || reducedMotion.matches || !sceneVisible) {
@@ -53,17 +59,24 @@
     const request = activeVideo.play();
     if (request?.catch) request.catch(() => {});
     // The underlying clip keeps playing during the fade to avoid a frozen transition.
-    if (activeVideo === scrollVideo && !firstVideoFailed) foreground.play()?.catch(() => {});
-    if (activeVideo === foreground) scrollVideo.pause();
+    if (activeVideo === scrollVideo && !firstVideoFailed && scrollMix < 1) foreground.play()?.catch(() => {});
+    if (activeVideo === foreground && scrollMix < 0.002) scrollVideo.pause();
   }
 
-  function render() {
+  function render(time) {
     frame = 0;
+    const delta = Math.min(50, lastFrameTime ? time - lastFrameTime : 16);
+    lastFrameTime = time;
     const progress = reducedMotion.matches ? 0 : clamp((scrollY - sceneTop) / distance);
+    desiredMix = ease((progress - 0.14) / 0.42);
     // Hysteresis prevents flickering when scrolling around the transition point.
     if (progress > 0.18) wantsScrollVideo = true;
     else if (progress < 0.08) wantsScrollVideo = false;
     updateVideo();
+    scrollMix = reducedMotion.matches ? targetMix : scrollMix + (targetMix - scrollMix) * (1 - Math.exp(-delta / 130));
+    if (Math.abs(targetMix - scrollMix) < 0.001) scrollMix = targetMix;
+    hero.style.setProperty('--video-mix', scrollMix.toFixed(4));
+    hero.style.setProperty('--video-reveal-y', `${(1 - scrollMix) * 10}px`);
     const move = ease((progress - 0.08) / 0.76);
     const fade = ease(progress / 0.38);
     const enter = ease((progress - 0.28) / 0.5);
@@ -78,6 +91,9 @@
     hero.style.setProperty('--rule-scale', enter.toFixed(4));
     hero.classList.toggle('scene-transitioning', fade > 0.95);
     menu.inert = !reducedMotion.matches && enter < 0.15;
+    if (Math.abs(targetMix - scrollMix) > 0.001) requestRender();
+    else if (activeVideo === foreground && scrollMix === 0) scrollVideo.pause();
+    else if (activeVideo === scrollVideo && scrollMix === 1) foreground.pause();
   }
   function requestRender() {
     if (!frame) frame = requestAnimationFrame(render);
