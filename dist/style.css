@@ -117,3 +117,29 @@ img{display:block;max-width:100%}
   .hero-video-main{will-change:auto}
   .scroll-reveal{opacity:1;transform:none!important}
 }
+
+/* The actual menu travels into the composition, directly beneath its title. */
+.menu-section.hero-menu-intro{right:7%;top:54%;width:44%;padding:0;background:transparent;pointer-events:auto;max-height:calc(100svh - 155px);overflow-y:auto;overflow-x:hidden;scrollbar-width:thin}
+.hero-menu-intro .menu-topline,.hero-menu-intro .menu-feature,.hero-menu-intro .menu-heading>p,.hero-menu-intro .menu-note{display:none}
+.hero-menu-intro .menu-heading{padding:0 0 14px;display:block}
+.hero-menu-intro .menu-heading h2{font-size:clamp(36px,4vw,58px);margin:6px 0 0;letter-spacing:-2px;line-height:1.3}
+.hero-menu-intro .menu-heading h2 em{color:var(--green)}
+.hero-menu-intro .menu-tabs{margin:0 0 12px;gap:26px}
+.hero-menu-intro .menu-tabs button{padding:10px 0 12px}
+.hero-menu-intro .menu-layout{display:block}
+.hero-menu-intro .menu-items{min-height:0;display:block}
+.hero-menu-intro .menu-item{padding:18px 0}
+.hero-menu-intro .item-title h3{font-size:clamp(16px,1.5vw,21px)}
+.hero-menu-intro .menu-item p{font-size:12px}
+@media(max-width:700px){
+  .menu-section.hero-menu-intro{right:6%;top:38%;width:88%;translate:none;max-height:calc(62svh - 24px)}
+  .hero-menu-intro .menu-heading{padding-bottom:10px}
+  .hero-menu-intro .menu-heading h2{font-size:32px;letter-spacing:-1px}
+  .hero-menu-intro .menu-kicker{font-size:10px}
+  .hero-menu-intro .menu-tabs{gap:24px;margin-bottom:8px}
+  .hero-menu-intro .menu-item{padding:14px 0}
+  .hero-menu-intro .item-title h3{font-size:16px}
+  .hero-menu-intro .item-title{gap:8px}
+  .hero-menu-intro .item-title .tag{font-size:9px}
+  .hero-menu-intro .menu-item p{font-size:11px;line-height:1.7}
+}

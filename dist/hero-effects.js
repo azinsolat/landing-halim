@@ -5,6 +5,7 @@
   const hero = scene?.querySelector('.hero');
   const foreground = hero?.querySelector('.hero-video-main');
   if (!foreground) return;
+  const menu = document.querySelector('.menu-section');
 
   const reducedMotion = matchMedia('(prefers-reduced-motion: reduce)');
   const compact = matchMedia('(max-width: 700px)');
@@ -31,8 +32,8 @@
     const fade = ease(progress / 0.38);
     const enter = ease((progress - 0.28) / 0.5);
     hero.style.setProperty('--bowl-x', `${-move * (compact.matches ? 15 : 23)}vw`);
-    hero.style.setProperty('--bowl-y', `${move * (compact.matches ? 9 : 2)}vh`);
-    hero.style.setProperty('--bowl-scale', (1 - move * (compact.matches ? 0.17 : 0.08)).toFixed(4));
+    hero.style.setProperty('--bowl-y', `${move * (compact.matches ? -27 : 2)}vh`);
+    hero.style.setProperty('--bowl-scale', (1 - move * (compact.matches ? 0.45 : 0.08)).toFixed(4));
     hero.style.setProperty('--intro-opacity', (1 - fade).toFixed(4));
     hero.style.setProperty('--intro-y', `${-fade * 24}px`);
     hero.style.setProperty('--menu-opacity', enter.toFixed(4));
@@ -40,12 +41,20 @@
     hero.style.setProperty('--menu-y', `${(1 - enter) * 18}px`);
     hero.style.setProperty('--rule-scale', enter.toFixed(4));
     hero.classList.toggle('scene-transitioning', fade > 0.95);
+    menu.inert = !reducedMotion.matches && enter < 0.15;
   }
   function requestRender() {
     if (!frame) frame = requestAnimationFrame(render);
   }
   function measure() {
     scene.classList.toggle('scroll-enabled', !reducedMotion.matches);
+    if (reducedMotion.matches) {
+      scene.after(menu);
+      menu.classList.remove('hero-menu-intro');
+    } else {
+      hero.append(menu);
+      menu.classList.add('hero-menu-intro');
+    }
     sceneTop = scene.getBoundingClientRect().top + scrollY;
     distance = Math.max(1, scene.offsetHeight - hero.offsetHeight);
     requestRender();
@@ -61,18 +70,15 @@
       syncPlayback();
     });
     playbackObserver.observe(scene);
-    const revealObserver = new IntersectionObserver(entries => {
-      entries.forEach(entry => {
-        if (!entry.isIntersecting) return;
-        entry.target.classList.add('is-visible');
-        revealObserver.unobserve(entry.target);
-      });
-    }, { threshold: 0.12 });
-    document.querySelectorAll('.menu-topline, .menu-heading, .menu-tabs, .menu-layout, .menu-note').forEach(element => {
-      revealObserver.observe(element);
-      element.classList.add('scroll-reveal');
-    });
   }
+  document.querySelectorAll('a[href="#menu"]').forEach(link => link.addEventListener('click', event => {
+    if (reducedMotion.matches) return;
+    event.preventDefault();
+    window.scrollTo({ top: sceneTop + distance * 0.9, behavior: 'smooth' });
+  }));
   document.addEventListener('visibilitychange', syncPlayback);
   measure();
+  if (location.hash === '#menu' && !reducedMotion.matches) {
+    requestAnimationFrame(() => window.scrollTo({ top: sceneTop + distance * 0.9, behavior: 'instant' }));
+  }
 })();
