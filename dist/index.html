@@ -6,7 +6,7 @@
 <title>حلیم‌سرا | حلیم تبریز</title>
 <meta name="description" content="حلیم‌سرا؛ حلیم اصیل تبریز، پخته‌شده با حوصله و سرو تازه.">
 <link rel="icon" href="assets/logo.png">
-  <link rel="stylesheet" href="style.css?v=20261007-smooth-video">
+  <link rel="stylesheet" href="style.css?v=20261009-bowl-3d">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Vazirmatn:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
@@ -33,13 +33,8 @@
       <h1 id="hero-title">حلیم<br><em>گرم و خوش‌عطر</em></h1>
     </div>
   </div>
-  <div class="hero-visual" aria-hidden="true">
-    <video class="hero-video hero-video-main" autoplay muted loop playsinline preload="auto" tabindex="-1">
-      <source src="assets/hero-start-20261007-clean.mp4" type="video/mp4">
-    </video>
-    <video class="hero-video hero-video-main hero-video-scroll" muted loop playsinline preload="auto" tabindex="-1">
-      <source src="assets/hero-menu-4k-20261007-clean.mp4" type="video/mp4">
-    </video>
+  <div class="hero-visual">
+    <model-viewer id="bowl-model" src="assets/halim-bowl.glb" alt="کاسهٔ سه‌بعدی؛ نمای داخل و بدنه" camera-orbit="0deg 52deg auto" field-of-view="32deg" auto-rotate auto-rotate-delay="0" rotation-per-second="18deg" shadow-intensity="0.7" shadow-softness="1" exposure="1.1" interaction-prompt="none" loading="eager"><span slot="poster" class="model-status">در حال آماده‌سازی کاسه…</span></model-viewer>
   </div>
   <div class="hero-copy">
     <span class="hero-copy-label">کره · دارچین · کنجد</span>
@@ -78,7 +73,8 @@
   <a class="footer-brand" href="#home">حلیم‌سرا <span>· تبریز</span></a>
   <a href="#home">بازگشت به بالا ↑</a>
 </footer>
+<script type="module" src="model-viewer.min.js"></script>
 <script src="app.js?v=20261007-menu-docked"></script>
-<script src="hero-effects.js?v=20261007-smooth-video" defer></script>
+<script src="hero-effects.js?v=20261009-bowl-3d" defer></script>
 </body>
 </html>
