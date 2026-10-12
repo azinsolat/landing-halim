@@ -1,0 +1,32 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 220 320">
+ <defs>
+  <linearGradient id="skin" x1="0" y1="0" x2="1" y2=".25"><stop stop-color="#b97856"/><stop offset=".28" stop-color="#dfa27d"/><stop offset=".62" stop-color="#f1c09c"/><stop offset="1" stop-color="#ca8d69"/></linearGradient>
+  <linearGradient id="finger" x1="0" y1="0" x2=".8" y2="1"><stop stop-color="#f3c6a5"/><stop offset=".55" stop-color="#e6ae88"/><stop offset="1" stop-color="#bf7e5c"/></linearGradient>
+  <linearGradient id="thumb" x1="0" y1="0" x2="1" y2="1"><stop stop-color="#f5c9a7"/><stop offset=".6" stop-color="#e9b18b"/><stop offset="1" stop-color="#cd906c"/></linearGradient>
+  <linearGradient id="nail" x1="0" x2=".4" y2="1"><stop stop-color="#f4d5bf"/><stop offset="1" stop-color="#e7bda2"/></linearGradient>
+ </defs>
+ <g stroke-linecap="round" stroke-linejoin="round">
+  <!-- Tapered wrist, palm and softly curled little finger. -->
+  <path d="M65-25 C65 42 68 96 65 141 C61 158 57 174 60 193 C62 212 75 229 94 240 C108 248 130 253 150 248 C161 245 168 235 164 225 L153 195 C149 179 140 163 135 148 C129 111 139 42 145-25Z" fill="url(#skin)" stroke="#aa7052" stroke-width="1.1"/>
+  <path d="M130 181 C147 184 159 197 164 214 C169 228 163 241 154 241 C145 241 140 234 136 224 L125 203Z" fill="url(#finger)"/>
+  <path d="M112 183 C128 182 140 192 146 208 L156 235 C160 246 154 253 147 254 C139 254 134 249 130 240 L116 214Z" fill="url(#finger)" stroke="#bd825f" stroke-width="1"/>
+  <path d="M94 190 C106 183 119 190 125 201 L139 235 C144 247 140 259 131 260 C122 262 117 255 113 246 L98 220Z" fill="url(#finger)" stroke="#bb805e" stroke-width="1"/>
+  <path d="M139 228 Q146 226 151 229 M120 241 Q126 237 133 239 M150 214 Q156 212 160 214" fill="none" stroke="#ad7052" stroke-opacity=".45" stroke-width="1.1"/>
+  <!-- Index bends at two joints toward the opposed thumb pad. -->
+  <g id="index" transform="rotate(0 102 193)">
+   <path d="M86 187 C94 176 106 177 116 188 C125 199 130 211 135 220 C139 228 150 234 155 242 C161 250 158 261 151 266 C145 270 137 267 133 261 C129 255 128 249 123 245 C115 239 109 232 105 221 L93 201Z" fill="url(#finger)" stroke="#b87b59" stroke-width="1.1"/>
+   <path d="M135 246 C139 240 147 240 151 245 L154 253 C153 257 149 260 145 259 C140 258 137 253 135 246Z" fill="url(#nail)" stroke="#cb9c80" stroke-width=".8"/>
+   <path d="M114 215 Q121 210 126 212 M127 233 Q132 228 136 230" fill="none" stroke="#bc835f" stroke-opacity=".55" stroke-width="1"/>
+   <path d="M98 189 C106 189 112 196 116 205" fill="none" stroke="#ffddbd" stroke-opacity=".5" stroke-width="2"/>
+  </g>
+  <!-- Thumb emerges from the palm, with its pad opposing the index. -->
+  <g id="thumb-finger" transform="rotate(0 72 204)">
+   <path d="M63 190 C72 182 82 188 89 201 C95 213 102 223 114 232 C125 240 139 244 143 253 C147 260 143 268 136 269 C125 269 121 259 114 255 L90 243 C76 237 65 227 60 213 C57 203 58 196 63 190Z" fill="url(#thumb)"/>
+   <path d="M124 251 C129 247 135 250 139 255 C143 259 140 265 136 266 C130 266 126 261 124 251Z" fill="url(#nail)" stroke="#ca9779" stroke-width=".8"/>
+   <path d="M86 223 Q90 218 95 218 M91 231 Q96 226 100 227" fill="none" stroke="#bb805f" stroke-opacity=".45" stroke-width="1"/>
+   <path d="M67 194 C76 193 78 204 83 211" fill="none" stroke="#ffddbc" stroke-opacity=".55" stroke-width="2.3"/>
+  </g>
+  <path d="M72 152 Q96 160 125 153 M74 158 Q93 164 112 162" fill="none" stroke="#b78060" stroke-opacity=".32" stroke-width="1"/>
+  <path d="M80 12 C81 66 84 113 78 142" fill="none" stroke="#ffdcba" stroke-opacity=".2" stroke-width="8"/>
+ </g>
+</svg>
