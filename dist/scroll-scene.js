@@ -65,6 +65,7 @@
     if (!raf) { previous = performance.now(); raf = requestAnimationFrame(tick); }
   };
   const measure = () => {
+    cancelNavigation();
     scene.classList.add('scroll-enabled');
     if (reduced.matches) {
       cancelAnimationFrame(raf); raf = 0;
@@ -90,9 +91,62 @@
     visitScale = mobile.matches ? .62 : .88;
     visitX = w * (mobile.matches ? .5 : .74) - centerX;
     visitY = h * (mobile.matches ? .79 : .57) - centerY;
+    const model = scene.querySelector('#bowl-model');
+    if (!mobile.matches && model.loaded) {
+      // Reserve a rotation-safe silhouette and center the details between it and the map.
+      const size = model.getDimensions(), orbit = model.getCameraOrbit();
+      let radius = Math.hypot(size.x, size.z) / 2;
+      const key = Object.getOwnPropertySymbols(model).find(key => key.description === 'scene');
+      const rendered = key && model[key];
+      if (rendered?.model && rendered.camera?.position) {
+        if (!model.addressRotationRadius) {
+          const center = model.getBoundingBoxCenter();
+          rendered.model.updateWorldMatrix(true, true);
+          const inverse = rendered.model.matrixWorld.clone().invert();
+          const point = rendered.camera.position.clone();
+          let measured = 0;
+          rendered.model.traverse(mesh => {
+            const positions = mesh.geometry?.attributes?.position;
+            if (!positions) return;
+            const matrix = inverse.clone().multiply(mesh.matrixWorld);
+            for (let i = 0; i < positions.count; i++) {
+              point.fromBufferAttribute(positions, i).applyMatrix4(matrix);
+              measured = Math.max(measured, Math.hypot(point.x - center.x, point.z - center.z));
+            }
+          });
+          model.addressRotationRadius = measured;
+        }
+        radius = model.addressRotationRadius || radius;
+      }
+      const tanFov = Math.tan(model.getFieldOfView() * Math.PI / 360);
+      let extent = 0;
+      for (let i = 0; i < 96; i++) {
+        const angle = i / 96 * Math.PI * 2;
+        const depth = size.y / 2 * Math.abs(Math.cos(orbit.phi)) + radius * Math.sin(angle) * Math.sin(orbit.phi);
+        extent = Math.max(extent, Math.abs(radius * Math.cos(angle)) / ((orbit.radius - depth) * tanFov));
+      }
+      hero.style.setProperty('--visit-bowl-left', `${w * .74 - model.clientHeight * visitScale * extent / 2}px`);
+    }
     update(); paint();
   };
-  addEventListener('scroll', update, { passive: true });
+  scene.querySelector('#bowl-model').addEventListener('load', measure);
+  let idleTimer = 0, direction = 1, lastScroll = scrollY, touching = false;
+  let automatic = false, waitingForSugar = false, continuation = null;
+  const sceneProgress = () => -scene.getBoundingClientRect().top / (hero.offsetHeight * 1.2);
+  const settle = () => {
+    if (reduced.matches || touching || automatic || waitingForSugar) return;
+    const p = sceneProgress();
+    if (p <= .015 || p >= 2.3) return;
+    const destination = direction > 0 ? (p < 1.08 ? 1 : 2.3) : (p > .92 ? 1 : 0);
+    navigateTo(destination);
+  };
+  addEventListener('scroll', () => {
+    update();
+    if (Math.abs(scrollY - lastScroll) > .5 && !automatic && !waitingForSugar) direction = scrollY > lastScroll ? 1 : -1;
+    lastScroll = scrollY;
+    clearTimeout(idleTimer);
+    if (!automatic && !waitingForSugar) idleTimer = setTimeout(settle, 220);
+  }, { passive: true });
   addEventListener('resize', measure, { passive: true });
   reduced.addEventListener('change', measure);
   mobile.addEventListener('change', measure);
@@ -100,30 +154,57 @@
   const cancelNavigation = () => {
     cancelAnimationFrame(navigationFrame);
     navigationFrame = 0;
+    automatic = waitingForSugar = false;
+    continuation = null;
+    clearTimeout(idleTimer);
   };
   addEventListener('wheel', cancelNavigation, { passive: true });
   addEventListener('touchstart', cancelNavigation, { passive: true });
+  addEventListener('touchstart', () => { touching = true; }, { passive: true });
+  addEventListener('touchend', () => { touching = false; idleTimer = setTimeout(settle, 220); }, { passive: true });
+  addEventListener('touchcancel', () => { touching = false; }, { passive: true });
   addEventListener('keydown', event => {
     if (['ArrowUp', 'ArrowDown', 'PageUp', 'PageDown', 'Home', 'End', ' '].includes(event.key)) cancelNavigation();
   });
-  document.querySelectorAll('a[href="#menu"],a[href="#visit"]').forEach(link => link.addEventListener('click', event => {
-    if (reduced.matches) return;
-    event.preventDefault();
-    cancelNavigation();
-    const destination = scrollY + scene.getBoundingClientRect().top + hero.offsetHeight * 1.2 * (link.hash === '#visit' ? 2.3 : 1);
-    if (link.hash !== '#visit') {
-      scrollTo({ top: destination, behavior: 'smooth' });
-      return;
-    }
+  const navigateTo = (stop, bypassCheckpoint = false) => {
+    const p = sceneProgress();
+    const crossesMenu = (p < .94 && stop > 1) || (p > 1.35 && stop < 1);
+    const checkpoint = !bypassCheckpoint && (crossesMenu || stop === 1 || (stop === 0 && p > .6));
+    const waypoint = checkpoint ? 1 : stop;
+    continuation = checkpoint && stop !== 1 ? stop : null;
+    const destination = scrollY + scene.getBoundingClientRect().top + hero.offsetHeight * 1.2 * waypoint;
     const origin = scrollY;
-    const duration = 3300;
+    const returning = p > 1.35 || direction < 0;
+    automatic = true;
+    const duration = Math.max(650, Math.min(2200, Math.abs(destination - origin) / hero.offsetHeight * 1100));
     const started = performance.now();
     const navigate = now => {
       const progress = clamp((now - started) / duration);
       scrollTo({ top: origin + (destination - origin) * ease(progress), behavior: 'instant' });
       navigationFrame = progress < 1 ? requestAnimationFrame(navigate) : 0;
+      if (progress === 1) {
+        automatic = false;
+        clearTimeout(idleTimer);
+        if (checkpoint) {
+          waitingForSugar = true;
+          scene.dispatchEvent(new CustomEvent('bowl-pour-request', { detail: { replay: returning } }));
+        }
+      }
     };
     navigationFrame = requestAnimationFrame(navigate);
+  };
+  scene.addEventListener('bowl-pour-complete', () => {
+    if (!waitingForSugar) return;
+    waitingForSugar = false;
+    const stop = continuation;
+    continuation = null;
+    if (stop !== null) navigateTo(stop, true);
+  });
+  document.querySelectorAll('a[href="#menu"],a[href="#visit"]').forEach(link => link.addEventListener('click', event => {
+    if (reduced.matches) return;
+    event.preventDefault();
+    cancelNavigation();
+    navigateTo(link.hash === '#visit' ? 2.3 : 1);
   }));
   measure();
 })();
