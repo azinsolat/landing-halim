@@ -10,7 +10,7 @@
   hero.append(layer);
   const ctx = layer.getContext('2d');
   const hand = new Image();
-  hand.src = 'assets/sugar-hand-woman.png?v=20261010';
+  hand.src = 'assets/sugar-hand-woman.webp?v=20261013-lossless';
   const handPoses = [];
   // Bake a continuous deformation of the photographed fingers, keeping the wrist fixed.
   const prepareHandPoses = () => {
@@ -73,6 +73,8 @@
   const maxFlying = 160;
   const maxDeposits = 6500;
   let deposits = 0;
+  let cycleDeposits = 0;
+  const complete = () => scene.dispatchEvent(new CustomEvent('bowl-pour-complete'));
   // Matte, irregular sugar grains: tiny off-white solids with no glitter facets.
   const crystals = Array.from({ length: 12 }, (_, index) => {
     const sprite = document.createElement('canvas'); sprite.width = sprite.height = 16;
@@ -101,7 +103,7 @@
   };
   const clear = () => {
     cancelAnimationFrame(frame); frame = 0;
-    flying.length = 0; deposits = 0; releaseEndedAt = null;
+    flying.length = 0; deposits = 0; cycleDeposits = 0; releaseEndedAt = null;
     sugarOpacity = [];
     revealSugar();
     ctx.clearRect(0, 0, width, height); elapsed = emission = 0; state = 'idle';
@@ -127,7 +129,7 @@
     // The mobile wrist extends beyond the top edge throughout the pour.
     const tipY = compact ? 271 * handScale - 18 : Math.max(70, Math.min(271 * handScale - 30, anchor.y - 110 * Math.max(.7, scale)));
     // Reserved grains exhaust the pinch before the last falling grains land.
-    if (releaseEndedAt === null && (elapsed >= 5.8 || deposits + flying.length * 5 >= maxDeposits)) {
+    if (releaseEndedAt === null && (elapsed >= 5.8 || cycleDeposits + flying.length * 5 >= maxDeposits)) {
       releaseEndedAt = elapsed;
       emission = 0;
     }
@@ -152,7 +154,7 @@
       emission = Math.min(32, emission + dt * rate * smooth((elapsed - 1) / .18) * (1 - smooth((elapsed - 5.4) / .4)));
       while (emission >= 1) {
         emission--;
-        if (flying.length >= maxFlying || deposits + flying.length * 5 >= maxDeposits) break;
+        if (flying.length >= maxFlying || cycleDeposits + flying.length * 5 >= maxDeposits) break;
         // A narrow stream leaves the pinch and carries a little sideways momentum.
         // Landing follows the hand; grains never fan toward arbitrary points of the bowl.
         const landingX = Math.max(-.82, Math.min(.82, (tipX - anchor.x) / radius + (Math.random() + Math.random() - 1) * .42));
@@ -177,6 +179,7 @@
       const t = Math.min(1, grain.age / grain.duration);
       if (t === 1) {
         deposits = Math.min(maxDeposits, deposits + 5);
+        cycleDeposits += 5;
         flying.splice(i, 1); continue;
       }
       const x = grain.startX + (grain.targetX - grain.startX) * t;
@@ -190,24 +193,35 @@
     // Settled crystals are actual geometry on the food, rendered by the 3D viewer.
     revealSugar();
     ctx.globalAlpha = 1;
-    if (releaseEndedAt !== null && exit === 1 && flying.length === 0) state = 'settled';
+    if (releaseEndedAt !== null && exit === 1 && flying.length === 0) {
+      state = 'settled';
+      complete();
+      return;
+    }
     frame = requestAnimationFrame(draw);
   };
   const start = () => {
-    if (state !== 'idle' || progress < .995 || progress > 1.35 || !model.loaded || !hand.naturalWidth || motion.matches || document.hidden || !inView) return;
+    if (state !== 'idle' || Math.abs(progress - 1) > .005 || !model.loaded || !hand.naturalWidth || motion.matches || document.hidden || !inView) return;
     if (!model.queryHotspot('hotspot-steam')?.canvasPosition) return;
+    elapsed = emission = cycleDeposits = 0; releaseEndedAt = null;
     state = 'pouring'; previous = performance.now(); frame = requestAnimationFrame(draw);
   };
   scene.addEventListener('bowl-scroll-progress', event => {
     progress = event.detail;
-    if (progress < .6 && state !== 'idle') clear();
     if ((progress < .94 || progress > 1.35) && state === 'pouring') {
       state = 'settled'; releaseEndedAt = elapsed - .55;
       // Preserve grains already poured when the same bowl travels to the address.
       deposits = Math.min(maxDeposits, deposits + flying.length * 5);
       flying.length = 0; revealSugar();
       ctx.clearRect(0, 0, width, height);
+      cancelAnimationFrame(frame); frame = 0;
+      complete();
     }
+    start();
+  });
+  scene.addEventListener('bowl-pour-request', event => {
+    if (state === 'settled' && !event.detail.replay) { complete(); return; }
+    if (state === 'settled') state = 'idle';
     start();
   });
   model.addEventListener('load', () => {
@@ -223,7 +237,7 @@
   motion.addEventListener('change', () => { clear(); start(); });
   const resume = () => {
     if (document.hidden || !inView || motion.matches || frame) return;
-    if (state !== 'idle') { previous = performance.now(); frame = requestAnimationFrame(draw); }
+    if (state === 'pouring') { previous = performance.now(); frame = requestAnimationFrame(draw); }
     else start();
   };
   new IntersectionObserver(([entry]) => {
