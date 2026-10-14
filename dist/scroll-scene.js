@@ -168,14 +168,40 @@
     if (!mobile.matches || reduced.matches || event.touches.length !== 1
       || !menuScroller.contains(event.target)) return;
     const touch = event.touches[0];
-    // Decide at the start: reaching the edge during this swipe still reads
-    // the menu; a fresh swipe at that edge can leave the menu scene.
     menuGesture = {
       id: touch.identifier, x: touch.clientX, y: touch.clientY,
-      atBottom: menuScroller.scrollTop + menuScroller.clientHeight >= menuScroller.scrollHeight - 2,
-      atTop: menuScroller.scrollTop <= 2
+      lastY: touch.clientY, mode: null, destination: null,
+      atBottom: menuScroller.scrollTop + menuScroller.clientHeight >= menuScroller.scrollHeight - 8,
+      atTop: menuScroller.scrollTop <= 8
     };
   }, { passive: true });
+  // Own vertical menu gestures before the browser locks them to the nested
+  // scroll area. This also works when native overscroll cancels touch events.
+  menuScroller.addEventListener('touchmove', event => {
+    const gesture = menuGesture;
+    if (!gesture || event.touches.length !== 1) return;
+    const touch = [...event.touches].find(item => item.identifier === gesture.id);
+    if (!touch) return;
+    const dy = gesture.y - touch.clientY;
+    const dx = gesture.x - touch.clientX;
+    if (!gesture.mode) {
+      if (Math.max(Math.abs(dx), Math.abs(dy)) < 8) return;
+      if (Math.abs(dx) >= Math.abs(dy)) { gesture.mode = 'horizontal'; return; }
+      // A swipe that starts with menu content remaining stays inside it.
+      gesture.destination = dy > 0 && gesture.atBottom ? 2.3
+        : dy < 0 && gesture.atTop ? 0 : null;
+      gesture.mode = gesture.destination === null ? 'menu' : 'page';
+    }
+    if (gesture.mode === 'horizontal') return;
+    if (event.cancelable) event.preventDefault();
+    const delta = gesture.lastY - touch.clientY;
+    gesture.lastY = touch.clientY;
+    if (gesture.mode === 'menu') menuScroller.scrollTop += delta;
+    else {
+      direction = gesture.destination === 2.3 ? 1 : -1;
+      scrollBy({ top: delta, behavior: 'instant' });
+    }
+  }, { passive: false });
   addEventListener('touchend', event => {
     touching = event.touches.length > 0;
     if (touching) return;
@@ -186,9 +212,9 @@
       if (!touch) return;
       const dy = gesture.y - touch.clientY;
       const dx = gesture.x - touch.clientX;
-      if (Math.abs(dy) < 40 || Math.abs(dy) <= Math.abs(dx)) return;
-      if (dy > 0 && gesture.atBottom) { direction = 1; navigateTo(2.3); }
-      else if (dy < 0 && gesture.atTop) { direction = -1; navigateTo(0); }
+      if (gesture.mode !== 'page' || Math.abs(dy) < 20 || Math.abs(dy) <= Math.abs(dx)) return;
+      // The menu has already been read; do not stop there for another pour.
+      navigateTo(gesture.destination, true);
       return;
     }
     idleTimer = setTimeout(settle, 220);
