@@ -42,10 +42,13 @@ function getShopStatus(date = new Date()) {
   if (minutes >= 420 && minutes < 450) {
     return { text: `${450 - minutes} دقیقه دیگه باز می‌کنیم`, open: false, blink: true };
   }
-  if (minutes >= 1410) {
-    return { text: `${1440 - minutes} دقیقه دیگه می‌بندیم`, open: true, blink: true };
+  if (minutes >= 1350 && minutes < 1380) {
+    const remaining = 1380 - minutes;
+    const text = remaining === 30 ? 'نیم ساعت دیگه می‌بندیم'
+      : `${remaining.toLocaleString('fa-IR')} دقیقه دیگه می‌بندیم`;
+    return { text, open: true, blink: true };
   }
-  if (minutes >= 450) return { text: 'در خدمتیم', open: true, blink: true };
+  if (minutes >= 450 && minutes < 1380) return { text: 'در خدمتیم', open: true, blink: true };
   return { text: 'بسته هستیم', open: false, blink: false };
 }
 const shopStatus = document.querySelector('.shop-status');
