@@ -160,9 +160,40 @@
   };
   addEventListener('wheel', cancelNavigation, { passive: true });
   addEventListener('touchstart', cancelNavigation, { passive: true });
-  addEventListener('touchstart', () => { touching = true; }, { passive: true });
-  addEventListener('touchend', () => { touching = false; idleTimer = setTimeout(settle, 220); }, { passive: true });
-  addEventListener('touchcancel', () => { touching = false; }, { passive: true });
+  const menuScroller = menu.querySelector('.menu-scroll-content');
+  let menuGesture = null;
+  addEventListener('touchstart', event => {
+    touching = true;
+    menuGesture = null;
+    if (!mobile.matches || reduced.matches || event.touches.length !== 1
+      || !menuScroller.contains(event.target)) return;
+    const touch = event.touches[0];
+    // Decide at the start: reaching the edge during this swipe still reads
+    // the menu; a fresh swipe at that edge can leave the menu scene.
+    menuGesture = {
+      id: touch.identifier, x: touch.clientX, y: touch.clientY,
+      atBottom: menuScroller.scrollTop + menuScroller.clientHeight >= menuScroller.scrollHeight - 2,
+      atTop: menuScroller.scrollTop <= 2
+    };
+  }, { passive: true });
+  addEventListener('touchend', event => {
+    touching = event.touches.length > 0;
+    if (touching) return;
+    const gesture = menuGesture;
+    menuGesture = null;
+    if (gesture) {
+      const touch = [...event.changedTouches].find(item => item.identifier === gesture.id);
+      if (!touch) return;
+      const dy = gesture.y - touch.clientY;
+      const dx = gesture.x - touch.clientX;
+      if (Math.abs(dy) < 40 || Math.abs(dy) <= Math.abs(dx)) return;
+      if (dy > 0 && gesture.atBottom) { direction = 1; navigateTo(2.3); }
+      else if (dy < 0 && gesture.atTop) { direction = -1; navigateTo(0); }
+      return;
+    }
+    idleTimer = setTimeout(settle, 220);
+  }, { passive: true });
+  addEventListener('touchcancel', () => { touching = false; menuGesture = null; }, { passive: true });
   addEventListener('keydown', event => {
     if (['ArrowUp', 'ArrowDown', 'PageUp', 'PageDown', 'Home', 'End', ' '].includes(event.key)) cancelNavigation();
   });
