@@ -1,4 +1,4 @@
-# Halim Saraye Tabriz
+# Halim Tabriz
 
 A responsive Persian static landing page with a `#892320` hero background, an interactive 3D bowl, a breakfast menu, and restaurant contact information.
 
