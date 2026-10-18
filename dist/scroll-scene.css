@@ -6,7 +6,7 @@
 .mobile-address-link{display:none}
 .mobile-address-link.is-hidden{opacity:0;visibility:hidden;pointer-events:none;translate:0 12px}
 @media(max-width:900px){
- .mobile-address-link{position:fixed;z-index:8;left:calc(6% - 5px);right:auto;bottom:58px;display:flex;align-items:center;justify-content:center;gap:8px;min-height:48px;padding:10px 18px;border-radius:999px;background:var(--cream);color:var(--green);border:1px solid #ffffff80;box-shadow:0 6px 24px #10251b38;font-size:15px;font-weight:700;transition:opacity .25s,visibility .25s,translate .25s}
+ .mobile-address-link{position:fixed;z-index:8;left:calc(6% - 5px);right:auto;top:82px;bottom:auto;display:flex;align-items:center;justify-content:center;gap:8px;min-height:48px;padding:10px 18px;border-radius:999px;background:var(--cream);color:var(--green);border:1px solid #ffffff80;box-shadow:0 6px 24px #10251b38;font-size:15px;font-weight:700;transition:opacity .25s,visibility .25s,translate .25s}
  .mobile-address-link svg{width:24px;height:24px;flex:none}
  .mobile-address-link:active{scale:.96}
  .mobile-address-link:focus-visible{outline:3px solid var(--gold);outline-offset:3px}
@@ -162,7 +162,7 @@ body,.hero-scroll-scene,.scroll-enabled .hero,.site-footer{background:var(--scen
  .scroll-enabled .item-title h3{font-size:16px}
  .scroll-enabled .item-title .tag{font-size:10px}
  .scroll-enabled .menu-item p{font-size:12px}
- .scroll-enabled .menu-scroll-content{max-height:calc(53svh - 90px);padding-left:24px;overscroll-behavior:contain}
+ .scroll-enabled .menu-scroll-content{max-height:calc(53svh - 90px);padding-left:24px;overscroll-behavior:auto}
  .scroll-enabled .menu-note{font-size:10px;gap:8px}
 }
 @media(max-width:900px) and (max-height:650px){
@@ -172,7 +172,7 @@ body,.hero-scroll-scene,.scroll-enabled .hero,.site-footer{background:var(--scen
  .scroll-enabled .menu-heading h2{font-size:24px}.scroll-enabled .menu-heading{padding-bottom:4px}
 }
 @media(max-width:900px) and (orientation:landscape){
- .mobile-address-link{left:calc(5% - 5px);right:auto;bottom:80px}
+ .mobile-address-link{left:calc(5% - 5px);right:auto;top:82px;bottom:auto}
  .visit-section{grid-template-columns:minmax(0,1fr);gap:0}.visit-map-open{display:none}
  .visit-section{left:5%;top:54%;width:44%}.visit-section h2{width:100%;font-size:20px;margin:4px 0 8px}.visit-hours{padding-bottom:6px}.visit-address{padding:6px 0}.visit-hours .visit-time{font-size:20px}.visit-links a{padding:6px 12px}
  .scroll-enabled .hero-content{top:100px;right:6%;left:auto;width:28%}.scroll-enabled .hero-visual{inset:85px 30% 50px}
