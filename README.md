@@ -25,6 +25,12 @@ The static site is in `dist/`. Its main editable files are:
 
 Serve `dist/` with a static web server to preview or deploy the site. No build step is required.
 
+## Desktop viewport scaling
+
+`dist/desktop-fit.css` loads after the existing typography styles and scales the desktop header, hero, menu, and contact panel together. The October 18 reference is a 1920-pixel screenshot with a roughly 1897×838 content area at 75% browser zoom (about 2529×1117 CSS pixels). Desktop dimensions follow viewport proportions, so visitors do not need to set a particular browser zoom. Different aspect ratios retain the three-column composition while fitting the available height; mobile rules below 901 CSS pixels remain separate.
+
+The layout was checked at 1024×600, 1280×620, 1366×600, 1440×720, 1536×730, 1920×838, 1920×1080, 2560×1117, 2560×1440, and 3840×2160, plus a 390×844 mobile check. The local QA script `qa/verify-responsive-oct18.cjs` checks all three scenes for horizontal overflow and the desktop header, logo, and contact panel bounds. `qa/verify-menu-heading.cjs` checks that changing categories does not move the menu title. These QA scripts require Playwright with Chrome and the site served at `http://127.0.0.1:4173/`. Upload `desktop-fit.css` with the updated `index.html`.
+
 ## Optimized bowl
 
 The page loads `dist/assets/halim-bowl-optimized.glb` (2,540,236 bytes, down from 31,995,464 bytes). Unused data is removed, geometry is Draco-compressed at high precision without reducing triangle count, and textures retain their original resolution with WebP quality 100. Texture compression is visually high quality but not mathematically lossless. All six separately named sugar materials remain available to the animation.

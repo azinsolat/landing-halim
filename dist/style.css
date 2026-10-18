@@ -10,7 +10,7 @@ a{color:inherit;text-decoration:none}
 button{font:inherit;cursor:pointer}
 img{display:block;max-width:100%}
 .hero-wordmark{display:inline-block;position:relative;width:2.35em;height:1em;vertical-align:baseline}
-.hero-wordmark img{position:absolute;top:50%;left:50%;width:2.7em;max-width:none;height:auto;translate:-50% -50%;mix-blend-mode:screen}
+.hero-wordmark img{position:absolute;top:50%;left:50%;width:3.25em;max-width:none;height:auto;translate:-50% -50%;mix-blend-mode:screen}
 .hero{height:100svh;min-height:720px;max-height:1050px;position:relative;overflow:hidden;isolation:isolate;color:var(--green);background:#ead2b9}
 .site-header{position:absolute;z-index:5;inset:0 0 auto;height:98px;padding:0 6.5%;display:flex;align-items:center;gap:48px;border-bottom:1px solid rgba(242,230,216,.16)}
 .brand{display:flex;align-items:center;gap:12px;min-width:205px;color:var(--green)}
@@ -82,6 +82,8 @@ img{display:block;max-width:100%}
 .hero-scroll-scene{position:relative;background:var(--red)}
 .hero{position:relative;top:auto;height:100svh;min-height:720px;max-height:none;background:var(--red);color:var(--cream)}
 .hero::before,.hero::after{display:none}
+.hero::before{content:"";display:block;position:absolute;inset:0;z-index:0;pointer-events:none;background:url("assets/halim-background-labels.png") center 58% / auto 78% no-repeat;mix-blend-mode:multiply;opacity:var(--labels-opacity,.11)}
+@media(max-width:900px){.hero::before{background-size:100% auto;background-position:center 42%}}
 .brand,.main-nav,.mobile-toggle,.hero-kicker,.hero h1,.hero h1 em,.hero-copy,.hero-copy-label,.hero-side,.hero-bottom,.brand-name small{color:var(--cream)}
 .hero h1{font-size:clamp(48px,5.2vw,80px);text-shadow:none}
 .hero h1{color:#d6c3ac}

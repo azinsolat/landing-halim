@@ -20,6 +20,7 @@
   const green = rgb(palette.getPropertyValue('--green'));
   const paint = () => {
     const colorProgress = ease(clamp((current - 1.05) / 1.25));
+    hero.style.setProperty('--labels-opacity', (.11 * (1 - colorProgress)).toFixed(4));
     const background = red.map((value, index) => Math.round(value + (green[index] - value) * colorProgress));
     document.documentElement.style.setProperty('--scene-background', `rgb(${background.join(',')})`);
     const menuProgress = clamp(current);
@@ -89,7 +90,7 @@
     travelX = destinationX - centerX;
     travelY = h * (mobile.matches ? .30 : .61) - centerY;
     visitScale = mobile.matches ? .62 : .88;
-    visitX = w * (mobile.matches ? .5 : .74) - centerX;
+    visitX = w * (mobile.matches ? .5 : .84) - centerX;
     visitY = h * (mobile.matches ? .79 : .57) - centerY;
     const model = scene.querySelector('#bowl-model');
     if (!mobile.matches && model.loaded) {
@@ -125,7 +126,7 @@
         const depth = size.y / 2 * Math.abs(Math.cos(orbit.phi)) + radius * Math.sin(angle) * Math.sin(orbit.phi);
         extent = Math.max(extent, Math.abs(radius * Math.cos(angle)) / ((orbit.radius - depth) * tanFov));
       }
-      hero.style.setProperty('--visit-bowl-left', `${w * .74 - model.clientHeight * visitScale * extent / 2}px`);
+      hero.style.setProperty('--visit-bowl-left', `${w * .84 - model.clientHeight * visitScale * extent / 2}px`);
     }
     update(); paint();
   };

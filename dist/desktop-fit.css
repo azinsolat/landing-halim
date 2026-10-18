@@ -1,0 +1,63 @@
+/* Reference: 2529 x 1117 CSS pixels at 75% browser zoom.
+   Scale desktop details with the viewport instead of fixed pixel offsets.
+   Mobile and the reduced-motion document flow retain their existing layout. */
+@media (min-width:901px) {
+ .hero-scroll-scene{--desktop-unit:min(.03954vw,.08953svh);--reference-header:15.8svh;--reference-model-height:min(69svh,38vw)}
+ .scroll-enabled .site-header{gap:2.5vw}
+ .scroll-enabled .brand{gap:.85vw}
+ .scroll-enabled .site-header .brand-logo{height:min(12svh,5.76vw);width:auto}
+ .scroll-enabled .hero .site-header .brand-name{font-size:calc(35.8 * var(--desktop-unit))}
+ .scroll-enabled .brand-name small{font-size:calc(15.2 * var(--desktop-unit));margin-top:calc(6 * var(--desktop-unit))}
+ .scroll-enabled .hero .site-header .main-nav a,
+ .scroll-enabled .hero .site-header .shop-status,
+ .scroll-enabled .hero .header-link{font-size:calc(30.8 * var(--desktop-unit))}
+ .scroll-enabled .main-nav{gap:2.3vw}
+ .scroll-enabled .shop-status{padding:calc(16 * var(--desktop-unit)) calc(21.5 * var(--desktop-unit));gap:calc(9 * var(--desktop-unit))}
+ .scroll-enabled .shop-status-dot{width:calc(7 * var(--desktop-unit));height:calc(7 * var(--desktop-unit))}
+ .scroll-enabled .hero .header-link,.scroll-enabled .hero .button{min-height:7.6svh;gap:1vw;padding:.65vw 1.25vw .65vw .65vw}
+ .scroll-enabled .hero .header-link>span,.scroll-enabled .hero .button>span{width:2.25vw;height:2.25vw;font-size:calc(28 * var(--desktop-unit))}
+ .scroll-enabled .hero .button{font-size:calc(27.8 * var(--desktop-unit))}
+ .scroll-enabled .hero-content{top:54.1%;right:10%;width:22%}
+ .scroll-enabled .hero h1{font-size:min(5.2vw,12svh)}
+ .scroll-enabled .hero h1 em{font-size:min(2.2vw,5svh)}
+ .scroll-enabled .hero-copy-label{font-size:calc(29.8 * var(--desktop-unit))}
+ .scroll-enabled .hero-copy p{font-size:min(1.8vw,4.2svh);margin-block:1.1vw}
+ .scroll-enabled .hero-visual{top:calc(56svh - var(--reference-model-height)/2 - 1.79svh)}
+ .scroll-enabled .hero-side{font-size:calc(17.7 * var(--desktop-unit))}
+ .scroll-enabled .hero-bottom{font-size:calc(26.5 * var(--desktop-unit));min-height:7svh;padding:.7vw 1.4vw;gap:.8vw}
+ .scroll-enabled .hero-bottom span:last-child{font-size:calc(40 * var(--desktop-unit))}
+ .scroll-enabled .menu-section{max-height:calc(100svh - var(--reference-header) - 5.73svh)}
+ .scroll-enabled .menu-heading{padding-bottom:2svh}
+ .scroll-enabled .menu-heading h2{font-size:min(3.6vw,6svh)}
+ .scroll-enabled .menu-kicker{font-size:calc(25 * var(--desktop-unit))}
+ .scroll-enabled .menu-scroll-content{padding-left:calc(24 * var(--desktop-unit));max-height:none}
+ .scroll-enabled .menu-tabs{gap:1.3vw;margin-bottom:calc(12 * var(--desktop-unit))}
+ .scroll-enabled .menu-tabs button{font-size:calc(32.8 * var(--desktop-unit));padding-block:calc(15 * var(--desktop-unit))}
+ .scroll-enabled .menu-group-title{font-size:calc(34.8 * var(--desktop-unit));margin:calc(20 * var(--desktop-unit)) 0 calc(6 * var(--desktop-unit))}
+ .scroll-enabled .menu-group:first-child .menu-group-title{margin-top:calc(8 * var(--desktop-unit))}
+ .scroll-enabled .item-title h4,.scroll-enabled .menu-price{font-size:calc(39.6 * var(--desktop-unit))}
+ .scroll-enabled .menu-price small{font-size:calc(28.8 * var(--desktop-unit))}
+ .scroll-enabled .menu-group .menu-item{padding-block:1.4svh}
+ .scroll-enabled .visit-section{--visit-map-width:min(24vw,calc((100svh - var(--reference-header) - 4.48svh)*.8));--visit-details-width:27vw;--visit-gap:max(.84vw,calc((var(--visit-bowl-left,65vw) - 3.5vw - var(--visit-map-width) - var(--visit-details-width))/2))}
+ .scroll-enabled .visit-details{max-height:calc(100svh - var(--reference-header) - 7.16svh)}
+ .scroll-enabled .visit-map-image{max-height:calc(100svh - var(--reference-header) - 4.48svh)}
+ .scroll-enabled .visit-section h3{font-size:calc(34.1 * var(--desktop-unit));margin-bottom:calc(8 * var(--desktop-unit))}
+ .scroll-enabled .visit-hours p,.scroll-enabled .visit-address address,.scroll-enabled .visit-contact{font-size:calc(40.5 * var(--desktop-unit))}
+ .scroll-enabled .visit-hours .visit-time{font-size:calc(50.6 * var(--desktop-unit));margin-top:calc(8 * var(--desktop-unit))}
+ .scroll-enabled .visit-time span,.scroll-enabled .visit-contact a span{font-size:calc(27.8 * var(--desktop-unit))}
+ .scroll-enabled .visit-hours{padding-bottom:calc(20 * var(--desktop-unit))}
+ .scroll-enabled .visit-address{padding-block:calc(20 * var(--desktop-unit))}
+ .scroll-enabled .visit-contact{gap:calc(8 * var(--desktop-unit));margin-top:calc(12 * var(--desktop-unit))}
+ .scroll-enabled .visit-contact a{min-height:4.3svh;padding:calc(6 * var(--desktop-unit)) calc(10 * var(--desktop-unit))}
+ .scroll-enabled .visit-links{gap:calc(8 * var(--desktop-unit))}
+ .scroll-enabled .visit-links a{min-height:4.3svh;padding:calc(8 * var(--desktop-unit)) calc(10 * var(--desktop-unit));gap:calc(8 * var(--desktop-unit))}
+ .scroll-enabled .visit-links .map-label strong{font-size:calc(34.1 * var(--desktop-unit))}
+ .scroll-enabled .visit-links .map-icon{width:calc(28 * var(--desktop-unit));height:calc(28 * var(--desktop-unit))}
+ .scroll-enabled .visit-links .map-icon svg{width:calc(18 * var(--desktop-unit));height:calc(18 * var(--desktop-unit))}
+}
+@media (min-width:901px) and (prefers-reduced-motion:no-preference){
+ .scroll-enabled .menu-section{height:calc(100svh - var(--reference-header) - 5.73svh)}
+}
+@media (min-width:901px) and (prefers-reduced-motion:reduce){
+ .scroll-enabled .menu-section,.scroll-enabled .visit-details,.scroll-enabled .visit-map-image{max-height:none}
+}
